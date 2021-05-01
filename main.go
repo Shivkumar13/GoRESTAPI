@@ -5,6 +5,9 @@ import (
 	"log"
 	"net/http"
 
+	"math/rand"
+	"strconv"
+
 	"github.com/gorilla/mux"
 )
 
@@ -62,17 +65,50 @@ func getBooks(w http.ResponseWriter, r *http.Request) {
 
 func createBook(w http.ResponseWriter, r *http.Request) {
 
+	w.Header().Set("Content-Type", "application/json")
+	var book Book
+
+	_ = json.NewDecoder(r.Body).Decode(&book)
+	book.ID = strconv.Itoa(rand.Intn(10000000)) // Mock ID - not safe
+	Books = append(Books, book)
+	json.NewEncoder(w).Encode(book)
+
 }
 
 // Delete Book
 
 func deleteBook(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	params := mux.Vars(r)
+	for index, item := range Books {
 
+		if item.ID == params["id"] {
+			Books = append(Books[:index], Books[index+1:]...)
+			break
+		}
+	}
+	json.NewEncoder(w).Encode(Books)
 }
 
 // Update Book
 
 func updateBook(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	params := mux.Vars(r)
+	for index, item := range Books {
+
+		if item.ID == params["id"] {
+			Books = append(Books[:index], Books[index+1:]...)
+			var book Book
+
+			_ = json.NewDecoder(r.Body).Decode(&book)
+			book.ID = strconv.Itoa(rand.Intn(10000000)) // Mock ID - not safe
+			Books = append(Books, book)
+			json.NewEncoder(w).Encode(book)
+			return
+		}
+	}
+	json.NewEncoder(w).Encode(Books)
 
 }
 
